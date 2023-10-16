@@ -1,0 +1,82 @@
+Sub Aggregation()
+
+Dim i As Double
+Dim j As Double
+Dim k As Double
+Dim ticker As String
+Dim nextticker As String
+Dim previousticker As String
+Dim total As Double
+Dim opening As Double
+Dim closing As Double
+Dim yearly_change As Double
+Dim percent_change As Double
+Dim current As Worksheet
+
+'Loop through each worksheet
+For Each current In Worksheets
+    'Print titles
+    current.Cells(1, 9).Value = "Ticker"
+    current.Cells(1, 10).Value = "Yearly Change"
+    current.Cells(1, 11).Value = "Percent Change"
+    current.Cells(1, 12).Value = "Total Stock Volume"
+    'Set variables i (loops though database) and j (adds rows for aggregate table) to 0
+    i = 0
+    j = 0
+    
+    'Define ticker in current, previous and next row.
+    'Loop through the database until there is no more data rows
+    Do While Not IsEmpty(current.Cells(2 + i, 1).Value)
+        ticker = current.Cells(2 + i, 1).Value
+        previousticker = current.Cells(2 + i - 1, 1).Value
+        nextticker = current.Cells(2 + i + 1, 1).Value
+        'If the ticker is different to previous row, assume it is the start of the block, so we take the opening value and we reset the total to 0. We also write that value on our aggregate table
+        If ticker <> previousticker Then
+            current.Cells(2 + j, 9).Value = ticker
+            total = 0
+            opening = current.Cells(2 + i, 3).Value
+        
+        End If
+        
+        'Add value to the total, no matter if its first, last or in the middle of the block
+        total = total + current.Cells(2 + i, 7).Value
+        'If it's the last ticker (if the nex one is different), then write down the total value on the aggregate table, also grab the closing value andsubtract it from opening to figue out yearly change.
+        'divide the yearly change / opening to get % change. Print these values in their respective row
+        'format cells and add 1 to j togo to next row.
+        If ticker <> nextticker Then
+            current.Cells(2 + j, 12).Value = total
+        
+            'Yearly Change Calculation
+            closing = current.Cells(2 + i, 6).Value
+            yearly_change = closing - opening
+            current.Cells(2 + j, 10).Value = yearly_change
+        
+            'Format color
+            If yearly_change < 0 Then
+                current.Cells(2 + j, 10).Interior.ColorIndex = 3
+            
+            ElseIf yearly_change > 0 Then
+                current.Cells(2 + j, 10).Interior.ColorIndex = 4
+            
+            End If
+        
+            'Percent change calculation
+            percent_change = yearly_change / opening
+            current.Cells(2 + j, 11).Value = percent_change
+            'Format as %
+            current.Cells(2 + j, 11).NumberFormat = "0.00%"
+        
+            'Next row
+            j = j + 1
+        End If
+        
+        'add 1 to i to loop on next row.
+        i = i + 1
+    Loop
+    
+    'Format column width and volume number format
+    current.Columns("I:L").AutoFit
+    current.Columns("L:L").NumberFormat = "0"
+Next
+
+End Sub
