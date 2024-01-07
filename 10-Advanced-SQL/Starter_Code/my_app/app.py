@@ -52,19 +52,7 @@ def welcome():
 def precipitation():
     """Return the precipitation data as json"""
 
-    # USE RAW SQL
-    # query = """SELECT
-    #             date,
-    #             station,
-    #             prcp
-    #         FROM
-    #             measurement
-    #         WHERE
-    #             date >= '2016-08-23';
-    #         """
-    # df = pd.read_sql(text(query), con=engine)
-
-    # OR use ORM
+    # Using ORM
     db_data = session.query(Measurement.date, Measurement.station, Measurement.prcp).where(Measurement.date >= '2016-08-23').all()
     df2 = pd.DataFrame(db_data, columns=["date", "station", "prcp"])
 
